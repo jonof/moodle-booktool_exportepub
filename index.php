@@ -107,16 +107,17 @@ if (isset($ebooksettings['rights'])) {
 // Add stylesheet and cover
 $epub->add_item_filepath(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'luci.css',
                          'text/css', 'luci.css');
-$epub->add_spine_item($epub->get_html_cover($booktitle, null, null, null,
-                                            'luci.css'), 'cover.html');
+$doc = toolbook_exportepub_make_xhtml_document(
+    $epub->get_html_cover($booktitle, null, null, null, 'luci.css'));
+$epub->add_spine_item($doc->saveXML(), 'cover.html');
 
 // Add description text
 if ($ebooksettings['includeDescription']) {
     $text = format_text($book->intro, $book->introformat,
                         array('noclean' => true, 'context' => $context));
-    $epub->add_spine_item($epub->get_html_wrap($book->intro,
-                                               get_string('summary'),
-                                               'luci.css'), 'intro.html');
+    $doc = toolbook_exportepub_make_xhtml_document(
+        $epub->get_html_wrap($book->intro, get_string('summary'), 'luci.css'));
+    $epub->add_spine_item($doc->saveXML(), 'intro.html');
     $epub->set_item_toc(get_string('summary'));
 }
 
@@ -164,21 +165,14 @@ foreach ($chapters as $cid => $ch) {
     $text .= format_text($content, $chapter->contentformat,
                          array('noclean' => true, 'context' => $context));
     $text .= '</div>';
-
+    $text = $epub->get_html_wrap($text, $title, 'luci.css', FALSE, "xmlns:epub='http://www.idpf.org/2007/ops'");
+    $doc = toolbook_exportepub_make_xhtml_document($text);
     if ($ebooksettings['embedNonlocalFiles']) {
-        try {
-            $doc = new DOMDocument();
-            @$doc->loadXML($text, LIBXML_NONET);
-            toolbook_exportepub_embed_external_files($doc, $epub);
-            $text = $doc->saveXML();
-            $text = substr($text, strpos($text, '?>') + 2);
-        } catch (Exception $e) {
-            // Ignore files that cannot be loaded
-        }
+        toolbook_exportepub_embed_external_files($doc, $epub);
     }
+    $text = $doc->saveXML();
 
-    $epub->add_spine_item($epub->get_html_wrap($text, $title, 'luci.css', FALSE, "xmlns:epub='http://www.idpf.org/2007/ops'"),
-                          'chap' . $ch->id . '.html');
+    $epub->add_spine_item($text, 'chap' . $ch->id . '.html');
     $epub->set_item_toc(null, true, !$first);
     $first = false;
 

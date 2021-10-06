@@ -784,9 +784,9 @@ class LuciEPUB {
     public static function get_html_head($title, $style = FALSE, $bodyclass = FALSE, $namespaces = '') {
 	if ($namespaces)
 	    $namespaces = ' ' . $namespaces;
-	$text = "<?xml version='1.0' encoding='UTF-8'?>\n<!DOCTYPE html>\n" .
-	    "<html xmlns='http://www.w3.org/1999/xhtml'" . $namespaces . ">\n" .
+	$text = "<html xmlns='http://www.w3.org/1999/xhtml'" . $namespaces . ">\n" .
 	    "<head>\n<title>" . self::escape($title) . "</title>\n";
+	$text .= "<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'/>\n";
 	if ($style)
 	    $text .= "<link href='" . self::escape($style) .
 		"' rel='stylesheet' type='text/css'/>\n";

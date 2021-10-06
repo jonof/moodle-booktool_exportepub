@@ -203,3 +203,21 @@ function toolbook_exportepub_embed_external_files($doc, $epub) {
         }
     }
 }
+
+function toolbook_exportepub_make_xhtml_document($text) {
+    $doc = new DOMDocument('1.0', 'UTF-8');
+    $dtd = $doc->implementation->createDocumentType('html', '-//W3C//DTD XHTML 1.1//EN',
+        'http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd');
+
+    try {
+        // Convert HTML content to conformant XHTML.
+        $doc->encoding = 'UTF-8';
+        @$doc->loadHTML($text, LIBXML_NONET | LIBXML_HTML_NODEFDTD);
+
+        $doc->insertBefore($dtd, $doc->firstChild);
+    } catch (Exception $e) {
+        $doc->insertBefore($dtd);
+    }
+
+    return $doc;
+}
