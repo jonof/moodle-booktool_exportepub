@@ -85,6 +85,8 @@ class match_saver {
     }
 }
 
+raise_memory_limit(MEMORY_EXTRA);
+
 // Create EPUB
 $modified = $book->timemodified;
 $booktitle = format_string($book->name, true, array('context' => $context));
